@@ -1,0 +1,100 @@
+<!DOCTYPE html><html>
+<head>
+  <meta charset="UTF-8">
+  <title>LINE一括シェアツール</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    button { margin-top: 10px; padding: 10px; font-size: 16px; }
+    .link { display: block; margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>LINEスキーム一括生成</h1>
+  <button onclick="startAutoShare()">自動送信スタート</button>
+  <div id="links"></div>  <script>
+    let links = [];
+    let currentIndex = 0;
+    let intervalId = null;
+
+    function toBase(num, base) {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let res = '';
+      do {
+        res = chars[num % base] + res;
+        num = Math.floor(num / base);
+      } while (num > 0);
+      return res;
+    }
+
+    function getRandomBase() {
+      return Math.floor(Math.random() * (36 - 2 + 1)) + 2;
+    }
+
+    function getRandomSuffix() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      return chars.charAt(Math.floor(Math.random() * chars.length)) +
+             chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    function generateLinks() {
+      links = [];
+      currentIndex = 0;
+
+      const baseText = '煌竺財閥バンザイ🙌';
+      const repeatCount = 1111;
+      const fullText = baseText.repeat(repeatCount).substring(0, 9999);
+
+      const chunkSize = 50;
+      const linksDiv = document.getElementById('links');
+      linksDiv.innerHTML = '';
+
+      let totalLength = 0;
+
+      for (let i = 0; i < fullText.length; i += chunkSize * 2) {
+        let chunk1 = fullText.substring(i, i + chunkSize);
+        let chunk2 = fullText.substring(i + chunkSize, i + chunkSize * 2);
+
+        let randomBase1 = getRandomBase();
+        let randomBase2 = getRandomBase();
+
+        let label1 = toBase(i / chunkSize, randomBase1).padStart(2, '0');
+        let label2 = toBase((i / chunkSize) + 1, randomBase2).padStart(2, '0');
+
+        let textWithNumber1 = `[${label1}]${chunk1}${getRandomSuffix()}`;
+        let textWithNumber2 = `[${label2}]${chunk2}${getRandomSuffix()}`;
+
+        let combinedText = textWithNumber1 + '\n' + textWithNumber2;
+
+        totalLength += combinedText.length;
+        if (totalLength > 9999) break;
+
+        let url = `line://msg/text/${encodeURIComponent(combinedText)}`;
+
+        links.push(url);
+
+        let a = document.createElement('a');
+        a.href = url;
+        a.className = 'link';
+        a.textContent = `シェア ${label1}+${label2}`;
+        a.target = '_blank';
+        linksDiv.appendChild(a);
+      }
+    }
+
+    function startAutoShare() {
+      if (links.length === 0) generateLinks();
+
+      if (intervalId) clearInterval(intervalId);
+
+      intervalId = setInterval(() => {
+        if (currentIndex >= links.length) {
+          clearInterval(intervalId);
+          return;
+        }
+
+        window.location.href = links[currentIndex];
+        currentIndex++;
+      }, 1000); // 1秒ごと
+    }
+  </script></body>
+</html>
