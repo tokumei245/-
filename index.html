@@ -1,3 +1,4 @@
+
 <!-- ファイル名: index.html -->
 
 <!DOCTYPE html><html>
@@ -32,10 +33,13 @@
       return Math.floor(Math.random() * (36 - 2 + 1)) + 2;
     }
 
-    function getRandomSuffix() {
+    function getRandomSuffix(length = 10) {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      return chars.charAt(Math.floor(Math.random() * chars.length)) +
-             chars.charAt(Math.floor(Math.random() * chars.length));
+      let res = '';
+      for (let i = 0; i < length; i++) {
+        res += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return res;
     }
 
     function generateLinks() {
@@ -43,43 +47,26 @@
       currentIndex = 0;
 
       const baseText = '煌竺財閥バンザイ🙌';
-      const repeatCount = 1111;
-      const fullText = baseText.repeat(repeatCount).substring(0, 9999);
+      const repeatCount = Math.floor(9999 / baseText.length);
+      const coreText = baseText.repeat(repeatCount).substring(0, 9999 - 20); // 残り20文字をランダム用に確保
 
-      const chunkSize = 50;
-      const linksDiv = document.getElementById('links');
-      linksDiv.innerHTML = '';
+      for (let i = 0; i < 30; i++) { // 30リンク分作成
+        let randomBase = getRandomBase();
+        let label = toBase(i, randomBase).padStart(2, '0');
+        let randomSuffix = getRandomSuffix(20); // 20文字ランダム
 
-      let totalLength = 0;
+        let finalText = `[${label}]` + coreText + randomSuffix;
 
-      for (let i = 0; i < fullText.length; i += chunkSize * 2) {
-        let chunk1 = fullText.substring(i, i + chunkSize);
-        let chunk2 = fullText.substring(i + chunkSize, i + chunkSize * 2);
-
-        let randomBase1 = getRandomBase();
-        let randomBase2 = getRandomBase();
-
-        let label1 = toBase(i / chunkSize, randomBase1).padStart(2, '0');
-        let label2 = toBase((i / chunkSize) + 1, randomBase2).padStart(2, '0');
-
-        let textWithNumber1 = `[${label1}]${chunk1}${getRandomSuffix()}`;
-        let textWithNumber2 = `[${label2}]${chunk2}${getRandomSuffix()}`;
-
-        let combinedText = textWithNumber1 + '\n' + textWithNumber2;
-
-        totalLength += combinedText.length;
-        if (totalLength > 9999) break;
-
-        let url = `line://msg/text/${encodeURIComponent(combinedText)}`;
+        let url = `line://msg/text/${encodeURIComponent(finalText)}`;
 
         links.push(url);
 
         let a = document.createElement('a');
         a.href = url;
         a.className = 'link';
-        a.textContent = `シェア ${label1}+${label2}`;
+        a.textContent = `シェア ${label}`;
         a.target = '_blank';
-        linksDiv.appendChild(a);
+        document.getElementById('links').appendChild(a);
       }
     }
 
