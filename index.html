@@ -1,9 +1,8 @@
 <!-- ファイル名: index.html -->
-
 <!DOCTYPE html><html>
 <head>
   <meta charset="UTF-8">
-  <title>LINE一括シェアツール</title>
+  <title>LINE一括シェアツール完全版</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     button { margin-top: 10px; padding: 10px; font-size: 16px; }
@@ -11,35 +10,44 @@
   </style>
 </head>
 <body>
-  <h1>LINEスキーム一括生成</h1>
+  <h1>LINEスキーム一括生成【完全版】</h1>
   <button onclick="startAutoShare()">自動送信スタート</button>
   <div id="links"></div>  <script>
     let links = [];
     let currentIndex = 0;
     let intervalId = null;
 
-    function getRandomSuffix(length = 50) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    function toBase15(num, length) {
+      const chars = '0123456789ABCDE';
       let res = '';
-      for (let i = 0; i < length; i++) {
-        res += chars.charAt(Math.floor(Math.random() * chars.length));
+      do {
+        res = chars[num % 15] + res;
+        num = Math.floor(num / 15);
+      } while (num > 0);
+      return res.padStart(length, '0');
+    }
+
+    function generatePattern() {
+      const pattern = '🙌煌竺財閥万歳🙌'; // 10文字
+      const blockLength = 6 + pattern.length; // 6桁 + 10文字 = 16文字
+      const repeatCount = Math.floor(9999 / blockLength);
+      let text = '';
+      for (let i = 0; i < repeatCount; i++) {
+        let randNum = Math.floor(Math.random() * Math.pow(15, 6));
+        let randText = toBase15(randNum, 6);
+        text += randText + pattern;
       }
-      return res;
+      // 文字数が9999ぴったりになるように切り取り
+      return text.substring(0, 9999);
     }
 
     function generateLinks() {
       links = [];
       currentIndex = 0;
+      document.getElementById('links').innerHTML = '';
 
-      const baseText = '煌竺財閥バンザイ🙌';
-      const repeatCount = Math.ceil(9999 / baseText.length);
-      const rawText = baseText.repeat(repeatCount);
-
-      for (let i = 0; i < 30; i++) { // 30リンク分作成
-        let suffix = getRandomSuffix(9999 - 5); // ラベル5文字分除く
-        let finalText = `[${i}]` + rawText;
-        finalText = finalText.substring(0, 9999 - suffix.length) + suffix;
-
+      for (let i = 0; i < 30; i++) {
+        let finalText = generatePattern();
         let url = `line://msg/text/${encodeURIComponent(finalText)}`;
 
         links.push(url);
@@ -47,7 +55,7 @@
         let a = document.createElement('a');
         a.href = url;
         a.className = 'link';
-        a.textContent = `シェア ${i}`;
+        a.textContent = `シェア ${i+1}`;
         a.target = '_blank';
         document.getElementById('links').appendChild(a);
       }
