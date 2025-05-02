@@ -1,4 +1,3 @@
-
 <!-- ファイル名: index.html -->
 
 <!DOCTYPE html><html>
@@ -19,21 +18,7 @@
     let currentIndex = 0;
     let intervalId = null;
 
-    function toBase(num, base) {
-      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      let res = '';
-      do {
-        res = chars[num % base] + res;
-        num = Math.floor(num / base);
-      } while (num > 0);
-      return res;
-    }
-
-    function getRandomBase() {
-      return Math.floor(Math.random() * (36 - 2 + 1)) + 2;
-    }
-
-    function getRandomSuffix(length = 10) {
+    function getRandomSuffix(length = 50) {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
       let res = '';
       for (let i = 0; i < length; i++) {
@@ -47,15 +32,13 @@
       currentIndex = 0;
 
       const baseText = '煌竺財閥バンザイ🙌';
-      const repeatCount = Math.floor(9999 / baseText.length);
-      const coreText = baseText.repeat(repeatCount).substring(0, 9999 - 20); // 残り20文字をランダム用に確保
+      const repeatCount = Math.ceil(9999 / baseText.length);
+      const rawText = baseText.repeat(repeatCount);
 
       for (let i = 0; i < 30; i++) { // 30リンク分作成
-        let randomBase = getRandomBase();
-        let label = toBase(i, randomBase).padStart(2, '0');
-        let randomSuffix = getRandomSuffix(20); // 20文字ランダム
-
-        let finalText = `[${label}]` + coreText + randomSuffix;
+        let suffix = getRandomSuffix(9999 - 5); // ラベル5文字分除く
+        let finalText = `[${i}]` + rawText;
+        finalText = finalText.substring(0, 9999 - suffix.length) + suffix;
 
         let url = `line://msg/text/${encodeURIComponent(finalText)}`;
 
@@ -64,7 +47,7 @@
         let a = document.createElement('a');
         a.href = url;
         a.className = 'link';
-        a.textContent = `シェア ${label}`;
+        a.textContent = `シェア ${i}`;
         a.target = '_blank';
         document.getElementById('links').appendChild(a);
       }
